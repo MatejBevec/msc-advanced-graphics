@@ -1,0 +1,50 @@
+{
+  "particles": [
+    {
+      "mass": [1, 2],
+      "lifetime": [5, 7]
+    }
+  ],
+  "emitters": [
+    {
+      "type": "disk",
+      "particles": [0],
+      "rate": 20,
+      "limit": 10000,
+      "velocity": [0, 1],
+      "parameters": {
+        "position": [-4, 0, 0],
+        "direction": [1, 0, 0],
+        "radius": 2
+      }
+    },
+    {
+      "type": "disk",
+      "particles": [0],
+      "rate": 20,
+      "limit": 10000,
+      "velocity": [0, 1],
+      "parameters": {
+        "position": [4, 0, 0],
+        "direction": [-1, 0, 0],
+        "radius": 2
+      }
+    }
+  ],
+  "forces": [
+    {
+      "type": "drag",
+      "parameters": {
+        "wind": [0, 0, 0],
+        "drag": 0.05
+      }
+    },
+    {
+      "type": "radial",
+      "parameters": {
+        "position": [0, 0, 0],
+        "strength": 0.3
+      }
+    }
+  ]
+}
