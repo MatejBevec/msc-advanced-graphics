@@ -29,6 +29,7 @@ loadJSON("params/default.json").then((obj) => {
 
 
 function setCurrentParticles(simulator, geometry, dt) {
+    // retrieves current particle positions from simulator and updates geometry
 
     const particles = simulator.update(dt)
 

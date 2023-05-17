@@ -2,23 +2,30 @@ import * as THREE from 'three';
 
 
 export function indexArray(arr, idx){
+    // returns arr elements at indices idx
 
     let idxSet = new Set(idx)
     let filtered = arr.filter( (val, i) =>  idxSet.has(i))
     return filtered
 }
 
+
 export function sampleUniform(range){
+    // returns uniformly random float between range[0] and range[1]
 
     return range[0] + Math.random() * (range[1] - range[0])
 }
 
+
 export function randomInt(min, max){
+    // returns random integer between min, inclusive, and max, exclusive
 
     return Math.floor(Math.random() * (max - min) + min)
 }
 
+
 export function perpendicularVector(vec){
+    // returns one of perpendicular vectors to vec
 
     if (vec.x == -1 && vec.y == 1 && vec.z == 0)
         return new THREE.Vector3(-1, -1, -1)
@@ -26,7 +33,9 @@ export function perpendicularVector(vec){
     return new THREE.Vector3(vec.z, vec.z, -vec.x - vec.y)
 }
 
+
 export function eulerStep(F, h, x, v, m){
+    // solves one timestep for the equation F using Euler's method
 
     // F(x, v, m) should return [dx, dv] = [v, acceleration(x, v, m)]
 
@@ -39,7 +48,9 @@ export function eulerStep(F, h, x, v, m){
     return [newX, newV]
 }
 
+
 export function rungeKuttaStep(F, h, x, v, m){
+    // solves one timestep for the equation F using Runge-Kutta 4th order method
 
     // F(x, v, m) should return [dx, dv] = [v, acceleration(x, v, m)]
 
@@ -61,6 +72,7 @@ export function rungeKuttaStep(F, h, x, v, m){
 }
 
 export async function loadJSON(path){
+    // fetches and parses a json file to obj
 
     let res = await fetch(path)
     let json = await res.json()

@@ -3,18 +3,22 @@ import * as THREE from 'three'
 import { indexArray, sampleUniform, randomInt, perpendicularVector } from './utils.js'
 import { eulerStep, rungeKuttaStep} from './utils.js'
 
+
+
 class Emitter {
+
+    /** Base class for particle emitters */
 
     constructor(params, massTypes, lifetimeTypes){
         this.particles = params["particles"] // possible particle types
-        this.massTypes = massTypes
+        this.massTypes = massTypes  
         this.lifetimeTypes = lifetimeTypes
 
         this.rate = params["rate"] // expected spawn rate
         this.limit = params["limit"] // max existing particles at once
         this.velRange = params["velocity"] // emitted velocity range
 
-        this.particleCount = 0
+        this.particleCount = 0 // current number of particles
 
         this.initParams(params["parameters"])
     }
@@ -43,9 +47,16 @@ class Emitter {
         // determine a particle's position and velocity
     }
 
+    getObject(){
+        // get the Three.js visual representation for this object
+    }
+
 }
 
+
 class EmitterPoint extends Emitter {
+
+    /** Emits particles radially from a point source */
 
     initParams(params){
         this.pos = new THREE.Vector3().fromArray(params["position"])
@@ -53,6 +64,7 @@ class EmitterPoint extends Emitter {
     }
 
     emit(){
+        // sample outgoing direction
         let vel = sampleUniform(this.velRange)
         let polar = Math.random() * Math.PI * 2
         let azimuth = Math.random() * Math.PI * 2
@@ -61,6 +73,7 @@ class EmitterPoint extends Emitter {
         velVec = velVec.applyAxisAngle(new THREE.Vector3(0, 0, 1), polar)
         velVec = velVec.applyAxisAngle(new THREE.Vector3(0, 1, 0), azimuth)
 
+        // sample particle mass and lifetime
         let type = this.particles[randomInt(0, this.particles.length)]
         let mass = sampleUniform(this.massTypes[type])
         let lifetime = sampleUniform(this.lifetimeTypes[type])
@@ -81,7 +94,10 @@ class EmitterPoint extends Emitter {
 
 }
 
+
 class EmitterDisk extends Emitter {
+
+    /** Emits particles from a disk surface in the direction of its normal */
 
     initParams(params){
         this.pos = new THREE.Vector3().fromArray(params["position"])
@@ -90,16 +106,19 @@ class EmitterDisk extends Emitter {
     }
 
     emit(){
+        // sample offset from disk center
         let vel = sampleUniform(this.velRange)
         let r = Math.random() * this.rad
         let ang = Math.random() * Math.PI * 2
         let posOnDisk = [Math.cos(ang)*r, Math.sin(ang)*r]
-
+        
+        // compute origin position and outgoing velocity
         let planeVecA = perpendicularVector(this.dir).normalize()
         let planeVecB = planeVecA.clone().applyAxisAngle(this.dir, Math.PI/2)
         let pos = this.pos.clone().addScaledVector(planeVecA, posOnDisk[0]).addScaledVector(planeVecB, posOnDisk[1])
         let velVec = this.dir.clone().multiplyScalar(vel)
 
+        // sample particle mass and lifetime
         let type = this.particles[randomInt(0, this.particles.length)]
         let mass = sampleUniform(this.massTypes[type])
         let lifetime = sampleUniform(this.lifetimeTypes[type])
@@ -120,19 +139,26 @@ class EmitterDisk extends Emitter {
 }
 
 
+
+
 class Force {
 
+    /** Superclass for forces acting on particles */
+
     computeForce(pos, vel, mass){
-        // compute force for particle: to be impl. by subclasses
+        // compute force for a particle: to be impl. by subclasses
     }
 
 }
 
+
 class ForceConstant extends Force {
+
+    /** Constant force with force vector c */
 
     constructor(c) {
         super()
-        this.c = c
+        this.c = c // force vector
     }
 
     computeForce(pos, vel, mass){
@@ -142,6 +168,8 @@ class ForceConstant extends Force {
 }
 
 class ForceGravity extends Force {
+
+    /** Constant force with acceleration vector g */
 
     constructor(g) {
         super()
@@ -158,6 +186,8 @@ class ForceGravity extends Force {
 
 class ForceDrag extends Force {
 
+    /** Linear drag force with respect to "wind speed" vf */
+
     constructor(vf, b) {
         super()
         this.vf = vf // velocity of medium
@@ -165,7 +195,6 @@ class ForceDrag extends Force {
     }
 
     computeForce(pos, vel, mass) {
-        // TBA: return -b*(vel - vf)
 
         let diff = vel.clone().sub(this.vf)
         let force = diff.multiplyScalar(-this.b)
@@ -175,6 +204,8 @@ class ForceDrag extends Force {
 }
 
 class ForceRadial extends Force {
+
+    /** Radial force with origin in point xr */
 
     constructor(xr, s) {
         super()
@@ -195,6 +226,8 @@ class ForceRadial extends Force {
 
 class Collider {
 
+    /** Base class for collider objects */
+
     whichSide(pos) {
         // should return -1 or 1 based on the relative position of pos and collider
         return -1
@@ -203,11 +236,17 @@ class Collider {
     onCollide(particle) {
         // should return particle after collision
         return particle
-    }    
+    }
+    
+    getObject(){
+        // get the Three.js visual representation for this object
+    }
 
 }
 
 class ColliderPlane extends Collider {
+
+    /** Reflects particle when it collides with a plane */
 
     constructor(pos, normal) {
         super()
@@ -223,7 +262,6 @@ class ColliderPlane extends Collider {
 
     onCollide(particle) {
         particle.vel = particle.vel.reflect(this.normal)
-        //particle.vel.negate()
         return particle
     }
 
@@ -243,6 +281,8 @@ class ColliderPlane extends Collider {
 
 class Particle {
 
+    /** Object representing a single particle */
+
     constructor(pos, vel, mass, lifetime, emitter){
         this.pos = pos
         this.vel = vel != null ? vel : 0
@@ -256,7 +296,12 @@ class Particle {
 
 class SimulatorCPU {
 
+    /** Handles the particle system simulation (emission and dynamics).
+     * Produces particle positions every time steps. */
+
     constructor(params, method){
+
+        // set up ODE solver method
 
         if (!method) method = "basic"
 
@@ -271,6 +316,8 @@ class SimulatorCPU {
         else
             this.method = 0
 
+        
+        // parse emission parameters
 
         this.massTypes = []
         this.lifetimeTypes = []
@@ -296,6 +343,9 @@ class SimulatorCPU {
             
             this.emitters.push(em)
         }
+
+
+        // parse dynamics parameters
 
         this.forces = []
 
@@ -337,7 +387,8 @@ class SimulatorCPU {
 
     }
 
-    // EMISSIONS SAMPLING (TODO: consider moving to different class)
+
+    /** PARTICLE EMISSIONS */
 
     computeEmissions(particles, emitters, dt){
         
@@ -350,8 +401,7 @@ class SimulatorCPU {
         particles = particles.filter((par) => par.lifetime > 0)
 
         for (let emitter of emitters){
-            let emittedTypes = emitter.sampleEmitted(dt)
-            //let numEmitted = emitter.rate // TBA: POSSION SAMPLING
+            //let emittedTypes = emitter.sampleEmitted(dt)
             let numEmitted = emitter.sampleEmitted(dt)
             let numAllowed = Math.min(emitter.limit - emitter.particleCount, numEmitted)
             emitter.particleCount += numAllowed
@@ -372,10 +422,12 @@ class SimulatorCPU {
         return particles
     }
 
-    // PARTICLE DYNAMICS (TODO: consider moving to different class)
+    
+    /** PARTICLE DYNAMICS */
 
     computeDynamics(particles, forces, colliders, dt){
-
+        
+        // DIFFERENTIAL EQUATION
         let diffFunc = (x, v, m) => {
 
             let a = new THREE.Vector3(0, 0, 0)
