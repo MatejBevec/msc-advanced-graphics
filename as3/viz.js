@@ -5,7 +5,7 @@ import Stats from 'three/addons/libs/stats.module.js';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
 import SimulatorCPU from './simCPU.js'
-import { indexArray, sampleUniform, randomInt } from './utils.js'
+import { indexArray, sampleUniform, randomInt, loadJSON} from './utils.js'
 
 let renderer, scene, camera, stats, controls;
 let particles, geometry;
@@ -13,69 +13,18 @@ let params, method, simulator;
 let nowTime, prevTime, timestep;
 
 
-params = {
-  "particles": [
-    {
-      "mass": [1, 1],
-      "lifetime": [0.5, 1.5]
-    }
-  ],
-  "emitters": [
-    {
-      "type": "point",
-      "particles": [0],
-      "rate": 60,
-      "limit": 10000,
-      "velocity": [5, 15],
-      "parameters": {
-        "position": [0, 0, 0]
-      }
-    },
-    {
-      "type": "disk",
-      "particles": [0],
-      "rate": 30,
-      "limit": 10000,
-      "velocity": [10, 20],
-      "parameters": {
-        "position": [10, 0, 0],
-        "direction": [-1, 1.2, -0.5],
-        "radius": 3
-      }
-    },
-  ],
-  "forces": [
-    {
-      "type": "drag",
-      "parameters": {
-        "wind": [0, 0, 0],
-        "drag": 0.1
-      }
-    },
-    {
-      "type": "gravity",
-      "parameters": {
-          "acceleration": [0, -9.81, 0]
-      }
-    },
-  ],
-  "colliders": [
-    {
-      "type": "plane",
-      "parameters": {
-        "position": [0, -5, 0],
-        "normal": [0.3, 0.9, 0],
-      }
-    }
-  ]
-}
 
 method = "runge-kutta"
 
+loadJSON("params/default.json").then((obj) => {
 
-init();
-prevTime = Date.now()
-animate();
+  params = obj
+
+  init();
+  prevTime = Date.now()
+  animate();
+
+})
 
 
 
@@ -99,7 +48,6 @@ function setCurrentParticles(simulator, geometry, dt) {
         color.setHSL( i / particles.length, 1.0, 0.6 );
         colors.push( color.r, color.g, color.b );
 
-        console.log(p.mass)
         sizes.push( p.mass*10 );
     }
 
@@ -162,6 +110,17 @@ function init() {
         prevTime = Date.now()
 
       }
+    })
+
+    const demosEl = document.getElementById( 'demos' )
+    demosEl.addEventListener('change', (event) => {
+
+      let path = "./params/" + demosEl.value
+      loadJSON(path).then((obj) => {
+        params = obj
+        initScene()
+        prevTime = Date.now()
+      })
 
     })
 

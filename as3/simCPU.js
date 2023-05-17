@@ -1,6 +1,6 @@
 import * as THREE from 'three'
 
-import { indexArray, sampleUniform, randomInt } from './utils.js'
+import { indexArray, sampleUniform, randomInt, perpendicularVector } from './utils.js'
 import { eulerStep, rungeKuttaStep} from './utils.js'
 
 class Emitter {
@@ -63,7 +63,6 @@ class EmitterPoint extends Emitter {
 
         let type = this.particles[randomInt(0, this.particles.length)]
         let mass = sampleUniform(this.massTypes[type])
-        //console.log(mass)
         let lifetime = sampleUniform(this.lifetimeTypes[type])
 
         let particle = new Particle(this.pos, velVec, mass, lifetime, this)
@@ -96,7 +95,7 @@ class EmitterDisk extends Emitter {
         let ang = Math.random() * Math.PI * 2
         let posOnDisk = [Math.cos(ang)*r, Math.sin(ang)*r]
 
-        let planeVecA = new THREE.Vector3(this.dir.x, -this.dir.y, 0).normalize()
+        let planeVecA = perpendicularVector(this.dir).normalize()
         let planeVecB = planeVecA.clone().applyAxisAngle(this.dir, Math.PI/2)
         let pos = this.pos.clone().addScaledVector(planeVecA, posOnDisk[0]).addScaledVector(planeVecB, posOnDisk[1])
         let velVec = this.dir.clone().multiplyScalar(vel)
@@ -417,7 +416,6 @@ class SimulatorCPU {
                 acc[i] = acc[i].divideScalar(p.mass)
                 p.vel = p.vel.clone().add(acc[i])
                 p.pos = p.pos.clone().addScaledVector(p.vel, 0.2)
-                console.log(acc[i].x, p.vel.x, p.pos.x)
             }
         }
 
@@ -426,7 +424,6 @@ class SimulatorCPU {
             for (let p of particles){
                 let newX, newV
                 [newX, newV] = this.solver(diffFunc, dt, p.pos, p.vel, p.mass)
-                //console.log(p.pos.x, p.vel.x)
                 p.pos = newX
                 p.vel = newV
             }

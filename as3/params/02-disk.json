@@ -30,7 +30,7 @@
     {
       "type": "gravity",
       "parameters": {
-        "acceleration": [0, -0.981, 0]
+        "acceleration": [0, -9.81, 0]
       }
     }
   ]

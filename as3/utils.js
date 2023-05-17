@@ -18,6 +18,14 @@ export function randomInt(min, max){
     return Math.floor(Math.random() * (max - min) + min)
 }
 
+export function perpendicularVector(vec){
+
+    if (vec.x == -1 && vec.y == 1 && vec.z == 0)
+        return new THREE.Vector3(-1, -1, -1)
+
+    return new THREE.Vector3(vec.z, vec.z, -vec.x - vec.y)
+}
+
 export function eulerStep(F, h, x, v, m){
 
     // F(x, v, m) should return [dx, dv] = [v, acceleration(x, v, m)]
@@ -50,4 +58,11 @@ export function rungeKuttaStep(F, h, x, v, m){
 
     return [newX, newV]
 
+}
+
+export async function loadJSON(path){
+
+    let res = await fetch(path)
+    let json = await res.json()
+    return json
 }

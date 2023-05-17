@@ -9,13 +9,29 @@
 		#upload {
 			position: absolute;
 			top: 10px;
-			right: 0px;
+			right: 200px;
 			color: white;
+		}
+		#demos {
+			position: absolute;
+			top: 10px;
+			right: 10px;
+			color: black;
+		}
+		#demos-label {
+			position: absolute;
+			top: 10px;
+			right: 90px;
+			color: white;
+			margin: 0;
+			font-family: "Tahoma";
+			font-size: 14px;
 		}
 		#container {
 			margin: 0;
 			padding: 0;
 		}
+
 		
 	</style>
 
@@ -29,7 +45,20 @@
 
 		<input type="file" id="upload" name="Upload Parameters" value="Upload Parameters" accept="text/json">
 
+		<p id="demos-label">or select a demo</p>
+		<select name="Choose Demo" id="demos">
+			<option value="default.json">Default</option>
+			<option value="01-point.json">Point</option>
+			<option value="02-disk.json">Disk</option>
+			<option value="03-radial.json">Radial</option>
+			<option value="04-wind.json">Wind</option>
+			<option value="05-masses.json">Masses</option>
+			<option value="06-stress.json">Stress</option>
+		  </select>
+
+
 		<div id="container"></div>
+
 
 
 
