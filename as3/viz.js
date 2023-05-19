@@ -49,7 +49,7 @@ function setCurrentParticles(simulator, geometry, dt) {
         color.setHSL( i / particles.length, 1.0, 0.6 );
         colors.push( color.r, color.g, color.b );
 
-        sizes.push( p.mass*10 );
+        sizes.push( p.mass*5 );
     }
 
     geometry.setAttribute( 'position', new THREE.Float32BufferAttribute( positions, 3 ) );
@@ -137,8 +137,11 @@ function initScene() {
 
     // PARTICLE OBJECTS
 
+    let sprite = new THREE.TextureLoader().load( 'assets/lesar.png' )
+    sprite.rotation = Math.PI/2
+
     const uniforms = {
-        pointTexture: { value: new THREE.TextureLoader().load( 'assets/spark1.png' ) }
+        pointTexture: { value:  sprite}
     };
 
     const shaderMaterial = new THREE.ShaderMaterial( {
